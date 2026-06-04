@@ -151,10 +151,10 @@ if user_input:
                     boxes = []
                     for i in range(1, 6):
                         if i == number:
-                            boxes.append("[x]")
+                            boxes.append("[   x   ]")
                         else:
-                            boxes.append("[ ]")
-                    return " ".join(boxes)
+                            boxes.append("[       ]")
+                    return "  ".join(boxes)
                 
                 # Display entries in three sections
                 st.markdown("**Questions 1-11:**")
