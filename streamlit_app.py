@@ -156,32 +156,22 @@ if user_input:
                             boxes.append("[ ]")
                     return " ".join(boxes)
                 
-                # Display entries in three sections with line breaks
-                verification_text = "Numbers entered:\n\n"
-                
-                # Section 1: Questions 1-11
-                verification_text += "**Questions 1-11:**\n"
+                # Display entries in three sections
+                st.markdown("**Questions 1-11:**")
                 for q_num in range(1, 12):
                     box_visual = create_box_representation(numbers[q_num - 1])
-                    verification_text += f"Q{q_num}: {box_visual}\n"
+                    st.write(f"Q{q_num}: {box_visual}")
                 
-                verification_text += "\n\n"  # 2 line breaks
-                
-                # Section 2: Questions 12-26
-                verification_text += "**Questions 12-26:**\n"
+                st.markdown("**Questions 12-26:**")
                 for q_num in range(12, 27):
                     box_visual = create_box_representation(numbers[q_num - 1])
-                    verification_text += f"Q{q_num}: {box_visual}\n"
+                    st.write(f"Q{q_num}: {box_visual}")
                 
-                verification_text += "\n\n"  # 2 line breaks
-                
-                # Section 3: Questions 27-33
-                verification_text += "**Questions 27-33:**\n"
+                st.markdown("**Questions 27-33:**")
                 for q_num in range(27, 34):
                     box_visual = create_box_representation(numbers[q_num - 1])
-                    verification_text += f"Q{q_num}: {box_visual}\n"
+                    st.write(f"Q{q_num}: {box_visual}")
                 
-                st.markdown(verification_text)
                 st.write(f"NOTE: Hit [Enable Editing] on Excel to reveal the scores") 
                 
         except Exception as e:
