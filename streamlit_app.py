@@ -151,9 +151,9 @@ if user_input:
                     boxes = []
                     for i in range(1, 6):
                         if i == number:
-                            boxes.append("[   x   ]")
+                            boxes.append("[    x    ]")
                         else:
-                            boxes.append("[       ]")
+                            boxes.append("[        ]")
                     return "  ".join(boxes)
                 
                 # Display entries in three sections
