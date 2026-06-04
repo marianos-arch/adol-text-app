@@ -141,10 +141,47 @@ if user_input:
                     )
 
                 
-                # Display the numbers for verification
+                # Display the numbers for verification with visual representation
                 st.subheader("3. Your Entries:")
                 st.write(f"Mentee Name and Date: {combined_name}")
-                st.write(f"Numbers entered: {', '.join(map(str, numbers))}")
+                
+                # Create visual representation with boxes
+                def create_box_representation(number):
+                    """Create a visual box for the response (1-5 scale)"""
+                    boxes = []
+                    for i in range(1, 6):
+                        if i == number:
+                            boxes.append("[x]")
+                        else:
+                            boxes.append("[ ]")
+                    return " ".join(boxes)
+                
+                # Display entries in three sections with line breaks
+                verification_text = "Numbers entered:\n\n"
+                
+                # Section 1: Questions 1-11
+                verification_text += "**Questions 1-11:**\n"
+                for q_num in range(1, 12):
+                    box_visual = create_box_representation(numbers[q_num - 1])
+                    verification_text += f"Q{q_num}: {box_visual}\n"
+                
+                verification_text += "\n\n"  # 2 line breaks
+                
+                # Section 2: Questions 12-26
+                verification_text += "**Questions 12-26:**\n"
+                for q_num in range(12, 27):
+                    box_visual = create_box_representation(numbers[q_num - 1])
+                    verification_text += f"Q{q_num}: {box_visual}\n"
+                
+                verification_text += "\n\n"  # 2 line breaks
+                
+                # Section 3: Questions 27-33
+                verification_text += "**Questions 27-33:**\n"
+                for q_num in range(27, 34):
+                    box_visual = create_box_representation(numbers[q_num - 1])
+                    verification_text += f"Q{q_num}: {box_visual}\n"
+                
+                st.markdown(verification_text)
                 st.write(f"NOTE: Hit [Enable Editing] on Excel to reveal the scores") 
                 
         except Exception as e:
