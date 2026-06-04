@@ -49,7 +49,7 @@ if user_input:
                 
                 # Load workbook
                 wb = load_workbook(template_bytes)
-                ws = wb.active
+                ws = wb.active # use the active sheet
                 
                 # Step 4: Insert numbers into specific cells
                 # Adjust the starting cell based on your template layout
