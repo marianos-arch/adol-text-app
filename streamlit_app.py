@@ -50,7 +50,9 @@ if user_input:
                 
                 # Load workbook
                 wb = load_workbook(template_bytes)
+                wb.calculation.calcMode = 'auto' 
                 ws = wb.active  # use the active sheet
+                
                 
                 # Step 4: Map each question number to its specific cell
                 # Format: question_number -> (row, col)
@@ -99,6 +101,12 @@ if user_input:
                         row, col = question_cell_mapping[question_num]
                         cell = ws.cell(row=row, column=col)
                         cell.value = number
+
+                #force Excel to recalculate formulas
+                try:
+                    wb.calculate()
+                except: 
+                        pass # some older excel versions may not support this
                 
                 # Step 5: Save to BytesIO for download
                 output = BytesIO()
