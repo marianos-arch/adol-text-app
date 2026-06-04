@@ -36,6 +36,7 @@ user_input = st.text_input(
     "Enter numbers (e.g., '44442145' or '4 4 4 4 2 1 4 5'):",
     placeholder="44442145"
 )
+st.caption("Each number must be between 1 and 5. Strong Disagree (1) - Strongly Agree (5) ")
 
 # Step 3: Process and validate input
 if user_input:
