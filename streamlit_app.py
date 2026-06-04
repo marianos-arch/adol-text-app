@@ -143,6 +143,7 @@ if user_input:
                 st.subheader("3. Your Entries:")
                 st.write(f"Mentee Name and Date: {combined_name}")
                 st.write(f"Numbers entered: {', '.join(map(str, numbers))}")
+                st.write(f"NOTE: Hit [Enable Editing] on Excel to reveal the scores") 
                 
         except Exception as e:
             st.error(f"❌ Error processing template: {e}")
