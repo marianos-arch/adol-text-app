@@ -132,36 +132,13 @@ if user_input:
                 safe_date = re.sub(r'[^0-9_-]', '', date_input.replace('/', '_'))
                 file_name = f"ADOL_Scoresheet_{safe_name}_{safe_date}.xlsx" if safe_name else "ADOL_Scoresheet_Filled.xlsx"
 
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    st.download_button(
+                st.download_button(
                         label="📥 Download Filled ADOL Sheet",
                         data=output.getvalue(),
                         file_name=file_name,
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
-                
-                with col2:
-                    # Create a simple HTML table for printing
-                    html_table = "<table border='1' style='border-collapse: collapse; width: 100%;'>"
-                    html_table += f"<tr><th colspan='2'>ADOL Scoresheet</th></tr>"
-                    html_table += f"<tr><td><b>Mentee:</b></td><td>{combined_name}</td></tr>"
-                    
-                    for question_num, number in enumerate(numbers, start=1):
-                        html_table += f"<tr><td>Question {question_num}:</td><td>{number}</td></tr>"
-                    
-                    html_table += "</table>"
-                    
-                    st.components.v1.html(f"""
-                    <button onclick="window.print()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    🖨️ Print Sheet
-                    </button>
-                    <div id="printable" style="margin-top: 20px;">
-                        {html_table}
-                    </div>
-                    """, height=300)             
-        
+
                 
                 # Display the numbers for verification
                 st.subheader("3. Your Entries:")
