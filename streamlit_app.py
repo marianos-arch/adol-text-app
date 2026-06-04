@@ -4,6 +4,7 @@ from openpyxl import load_workbook
 from io import BytesIO
 import re
 import requests
+from datetime import datetime
 
 
 st.title("Quick ADOL Template Guide")
@@ -11,11 +12,23 @@ st.title("Quick ADOL Template Guide")
 st.write("Insert numbers into the pre-formatted ADOL Scoresheet on Excel and Print it!")
 
 # Step 1: Get Mentee's Name
-st.subheader("1. Enter Mentee's name")
-mentee_name = st.text_input(
-    "Enter name:",
-    placeholder="John Doe"
-)
+st.subheader("1. Enter Mentee's name and date")
+col1, col2 = st.columns(2)
+
+with col1:
+    mentee_name = st.text_input(
+        "Enter name:",
+        placeholder="John Doe"
+    )
+
+with col2:
+    date_input = st.text_input(
+        "Enter date:",
+        placeholder="MM/DD/YYYY"
+    )
+
+# Combine name and date
+combined_name = f"{mentee_name} {date_input}".strip()
 
 # Step 2: Get user input
 st.subheader("2. Enter Your Numbers (From Question 1 to Question 33)")
@@ -92,8 +105,8 @@ if user_input:
                     33: (33, 4),  # D33
                 }
                 
-                # Insert mentee name at C1
-                ws.cell(row=1, column=3).value = mentee_name
+                # Insert combined mentee name and date at C1
+                ws.cell(row=1, column=3).value = combined_name
                 
                 # Insert each number into its corresponding cell
                 for question_num, number in enumerate(numbers, start=1):
@@ -114,9 +127,10 @@ if user_input:
                 output.seek(0)
                 
                 # Step 6: Provide download button
-                # Generate filename from mentee name
+                # Generate filename from mentee name and date
                 safe_name = re.sub(r'[^a-zA-Z0-9_-]', '', mentee_name.replace(' ', '_'))
-                file_name = f"ADOL_Scoresheet_{safe_name}.xlsx" if safe_name else "ADOL_Scoresheet_Filled.xlsx"
+                safe_date = re.sub(r'[^0-9_-]', '', date_input.replace('/', '_'))
+                file_name = f"ADOL_Scoresheet_{safe_name}_{safe_date}.xlsx" if safe_name else "ADOL_Scoresheet_Filled.xlsx"
                 
                 st.download_button(
                     label="📥 Download Filled ADOL Sheet",
@@ -127,7 +141,7 @@ if user_input:
                 
                 # Display the numbers for verification
                 st.subheader("3. Your Entries:")
-                st.write(f"Mentee Name: {mentee_name}")
+                st.write(f"Mentee Name and Date: {combined_name}")
                 st.write(f"Numbers entered: {', '.join(map(str, numbers))}")
                 
         except Exception as e:
