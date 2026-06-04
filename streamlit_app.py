@@ -114,10 +114,14 @@ if user_input:
                 output.seek(0)
                 
                 # Step 6: Provide download button
+                # Generate filename from mentee name
+                safe_name = re.sub(r'[^a-zA-Z0-9_-]', '', mentee_name.replace(' ', '_'))
+                file_name = f"ADOL_Scoresheet_{safe_name}.xlsx" if safe_name else "ADOL_Scoresheet_Filled.xlsx"
+                
                 st.download_button(
                     label="📥 Download Filled ADOL Sheet",
                     data=output.getvalue(),
-                    file_name="ADOL_Scoresheet_Filled.xlsx",
+                    file_name=file_name,
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
                 
