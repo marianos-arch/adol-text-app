@@ -161,9 +161,7 @@ if user_input:
                         {html_table}
                     </div>
                     """, height=300)             
-
-
-                )
+        
                 
                 # Display the numbers for verification
                 st.subheader("3. Your Entries:")
