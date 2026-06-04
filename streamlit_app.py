@@ -23,7 +23,7 @@ with col1:
 
 with col2:
     date_input = st.text_input(
-        "Enter date:",
+        "Enter Today's date:",
         placeholder="MM/DD/YYYY"
     )
 
