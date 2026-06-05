@@ -229,11 +229,11 @@ if input_method == "Click on Image":
             st.write("**Summary:**")
             entries_str = ''.join(str(n) if n > 0 else '_' for n in st.session_state.numbers)
             st.code(entries_str, language="text")
-        
-        with col2:
-            st.write("**Detailed View:**")
-            filled_answers = {i+1: n for i, n in enumerate(st.session_state.numbers) if n > 0}
-            st.json(filled_answers)
+        #
+        #with col2:
+        #    st.write("**Detailed View:**")
+         #   filled_answers = {i+1: n for i, n in enumerate(st.session_state.numbers) if n > 0}
+         #   st.json(filled_answers)
 
         # Show download button when complete
         if all(n > 0 for n in st.session_state.numbers):
