@@ -290,6 +290,6 @@ if input_method == "Type Numbers":
                         st.info(f"Note: Image visualization requires PNG files in your repository: adol_blank-1.png, adol_blank-2.png, adol_blank-3.png")
 
 
-        except Exception as e:
-            st.error(f"❌ Error processing template: {e}")
-            st.info("Make sure the template.xlsx file exists in your GitHub repository.")
+            except Exception as e:
+                st.error(f"❌ Error processing template: {e}")
+                st.info("Make sure the template.xlsx file exists in your GitHub repository.")
