@@ -238,7 +238,8 @@ if input_method == "Click on Image":
         # Show download button when complete
         if all(n > 0 for n in st.session_state.numbers):
             st.success("✓ All questions answered!")
-            
+            # DEFINE THE VARIABLE HERE: Pull the answers out of session state for Excel processing
+            numbers = st.session_state.numbers
             try:
                 # Download template from GitHub
                 github_url = "https://raw.githubusercontent.com/marianos-arch/adol-text-app/main/template.xlsx"
