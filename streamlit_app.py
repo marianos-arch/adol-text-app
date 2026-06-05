@@ -143,6 +143,12 @@ if input_method == "Click on Image":
     st.subheader("3. Click to Enter Your Scores")
     st.write("Navigate through each page and select your response for each question (1=Strongly Disagree, 5=Strongly Agree)")
     # display_page_with_overlay(st.session_state.current_page)
+    # 1. Define page_num here so Python knows what it is!
+    # If you haven't initialized it in session_state yet, default it to 1
+    if "current_page" not in st.session_state:
+        st.session_state.current_page = 1
+        
+    page_num = st.session_state.current_page
     # Get the question range for this page
     if page_num == 1:
         question_range = range(1, 12)
