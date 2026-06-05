@@ -96,52 +96,19 @@ for q in range(27, 34):
     QUESTION_TO_PAGE[q] = 3
 
 
-def draw_marker_on_image(image_path, question_num, selected_option, marker_color=(255, 0, 0), marker_radius=40):
-    """
-    Draw a circle or square on the image at the selected option's coordinate.
-    
-    Args:
-        image_path: Path to the image file
-        question_num: Question number (1-33)
-        selected_option: Selected option number (1-5)
-        marker_color: RGB tuple for marker color (default: red)
-        marker_radius: Radius of the circle/square
-    
-    Returns:
-        PIL Image object with marker drawn
-    """
-    img = Image.open(image_path).convert("RGB")
-    draw = ImageDraw.Draw(img, 'RGBA')
-    
-    if question_num in ALL_COORDINATES:
-        coords = ALL_COORDINATES[question_num]
-        # selected_option is 1-5, so index is selected_option - 1
-        if 1 <= selected_option <= 5:
-            x, y = coords[selected_option - 1]
-            # Draw circle with semi-transparent fill
-            draw.ellipse(
-                [(x - marker_radius, y - marker_radius), (x + marker_radius, y + marker_radius)],
-                outline=marker_color,
-                width=5,
-                fill=marker_color + (100,)  # Add alpha for transparency
-            )
-    
-    return img
-
-
-def create_annotated_page_image(base_image_path, page_num, numbers):
+def create_annotated_page_image(image_bytes, page_num, numbers):
     """
     Create an annotated version of a page with all markers for that page's questions.
     
     Args:
-        base_image_path: Path to the base PNG image
+        image_bytes: BytesIO object containing the image data
         page_num: Page number (1, 2, or 3)
         numbers: List of all 33 user input numbers
     
     Returns:
         PIL Image object with all markers for that page
     """
-    img = Image.open(base_image_path).convert("RGB")
+    img = Image.open(image_bytes).convert("RGB")
     draw = ImageDraw.Draw(img, 'RGBA')
     
     marker_color = (255, 0, 0)  # Red
@@ -287,15 +254,13 @@ if user_input:
                 # Try to load and display PNG images with markers
                 try:
                     for page_num in [1, 2, 3]:
-                        image_filename = f"page_{page_num}.png"
+                        image_filename = f"adol_blank-{page_num}.png"
                         github_image_url = f"https://raw.githubusercontent.com/marianos-arch/adol-text-app/main/{image_filename}"
                         
                         try:
                             # Download image from GitHub
                             img_response = requests.get(github_image_url)
                             if img_response.status_code == 200:
-                                base_image = Image.open(BytesIO(img_response.content))
-                                
                                 # Create annotated version
                                 annotated_img = create_annotated_page_image(
                                     BytesIO(img_response.content), 
@@ -304,7 +269,12 @@ if user_input:
                                 )
                                 
                                 # Display the annotated image
-                                st.markdown(f"**Page {page_num} - Questions {1 + (page_num-1)*11 if page_num < 3 else 27}-{11 + (page_num-1)*11 if page_num < 3 else 33}:**")
+                                if page_num == 1:
+                                    st.markdown(f"**Page {page_num} - Questions 1-11:**")
+                                elif page_num == 2:
+                                    st.markdown(f"**Page {page_num} - Questions 12-26:**")
+                                else:
+                                    st.markdown(f"**Page {page_num} - Questions 27-33:**")
                                 st.image(annotated_img, use_column_width=True)
                             else:
                                 st.warning(f"⚠️ Could not load {image_filename} from GitHub.")
@@ -312,7 +282,7 @@ if user_input:
                             st.warning(f"⚠️ Error processing {image_filename}: {e}")
                 
                 except Exception as e:
-                    st.info(f"Note: Image visualization requires PNG files in your repository: page_1.png, page_2.png, page_3.png")
+                    st.info(f"Note: Image visualization requires PNG files in your repository: adol_blank-1.png, adol_blank-2.png, adol_blank-3.png")
                 
                 
                 # Also display text representation
