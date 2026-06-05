@@ -14,7 +14,7 @@ st.title("Quick ADOL Template Guide")
 st.write("Insert numbers into the pre-formatted ADOL Scoresheet on Excel and Print it!")
 
 # Step 1: Get Mentee's Name
-st.subheader("1. Enter Mentee's name and date")
+st.subheader("1. Enter Mentee's name and today's date")
 col1, col2 = st.columns(2)
 
 with col1:
@@ -249,7 +249,7 @@ if user_input:
                 
                 # Display the numbers for verification with visual representation
                 st.subheader("3. Your Entries - Visual Confirmation on Images:")
-                st.write(f"Mentee Name and Date: {combined_name}")
+                st.write(f"Mentee Name and Today's Date: {combined_name}")
                 
                 # Display annotated images for each page
                 # Try to load and display PNG images with markers
