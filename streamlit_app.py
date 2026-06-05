@@ -80,8 +80,8 @@ def create_annotated_page_image(image_bytes, page_num, numbers):
     img = Image.open(image_bytes).convert("RGB")
     draw = ImageDraw.Draw(img, 'RGBA')
 
-    marker_color = (255, 0, 0)  # Red
-    marker_radius = 40
+    marker_color = (50, 205, 50)  # Lime green
+    marker_radius = 35
 
     # Determine question range for this page
     if page_num == 1:
