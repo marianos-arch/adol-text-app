@@ -8,6 +8,10 @@ from datetime import datetime
 from PIL import Image, ImageDraw
 import os
 import json
+try:
+    from streamlit_image_coordinates import streamlit_image_coordinates
+except ImportError:
+    streamlit_image_coordinates = None
 
 
 st.title("Quick ADOL Template Guide")
@@ -379,8 +383,25 @@ else:
                 else:
                     st.markdown(f"**Page {page_num} - Questions 27-33:**")
                 
-                # Display image with click coordinates (using streamlit-image-coordinates if available)
-                st.image(annotated_img, use_column_width=True)
+                # Use streamlit-image-coordinates for clickable image
+                if streamlit_image_coordinates is not None:
+                    coords = streamlit_image_coordinates(annotated_img, key=f"coords_page_{page_num}")
+                    
+                    # Process click if coordinates were returned
+                    if coords:
+                        x = coords["x"]
+                        y = coords["y"]
+                        question_num, option_value = find_question_at_click(x, y, page_num)
+                        
+                        if question_num and option_value:
+                            st.session_state.numbers[question_num - 1] = option_value
+                            st.success(f"✅ Question {question_num} set to {option_value}")
+                            st.rerun()
+                        else:
+                            st.info("Click on a response option to select it.")
+                else:
+                    st.image(annotated_img, use_column_width=True)
+                    st.info("💡 Tip: Install streamlit-image-coordinates for clickable image support.")
                 
                 # Manual input for each question on current page
                 if page_num == 1:
