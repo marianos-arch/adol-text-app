@@ -90,6 +90,53 @@ def process_excel_file(numbers, combined_name):
         ws = wb.active
         
         # Mapping of question numbers to Excel cell coordinates
+        question_cell_mapping = {1: (48, 4), 2: (38, 4), 3: (39, 4), 4: (49, 4), 5: (40, 4), 6: (41, 4), 7: (50, 4), 8: (51, 4), 9: (42, 4), 10: (52, 4), 11: (43, 4), 12: (4, 4), 13: (29, 4), 14: [...]}
+        
+        # Helper function to safely set cell values, handling merged cells
+        def set_cell_value(ws, row, col, value):
+            cell = ws.cell(row=row, column=col)
+            # Check if cell is part of a merged range
+            for merged_range in ws.merged_cells.ranges:
+                if cell.coordinate in merged_range:
+                    # Set the value on the top-left cell of the merged range
+                    cell = ws.cell(row=merged_range.min_row, column=merged_range.min_col)
+                    break
+            cell.value = value
+        
+        set_cell_value(ws, 1, 3, combined_name)
+        for question_num, number in enumerate(numbers, start=1):
+            if question_num in question_cell_mapping:
+                row, col = question_cell_mapping[question_num]
+                set_cell_value(ws, row, col, number)
+        
+        try:
+            wb.calculate()
+        except:
+            pass
+        
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        return output
+    except Exception as e:
+        st.error(f"Error processing template: {e}")
+        return None
+
+"""
+def process_excel_file(numbers, combined_name):
+    #Process and fill the Excel template with answers
+    try:
+        github_url = "https://raw.githubusercontent.com/marianos-arch/adol-text-app/main/template.xlsx"
+        response = requests.get(github_url)
+        if response.status_code != 200:
+            st.error(f"Failed to download template. Status code: {response.status_code}")
+            return None
+        template_bytes = BytesIO(response.content)
+        wb = load_workbook(template_bytes)
+        wb.calculation.calcMode = 'auto'
+        ws = wb.active
+        
+        # Mapping of question numbers to Excel cell coordinates
         question_cell_mapping = {1: (48, 4), 2: (38, 4), 3: (39, 4), 4: (49, 4), 5: (40, 4), 6: (41, 4), 7: (50, 4), 8: (51, 4), 9: (42, 4), 10: (52, 4), 11: (43, 4), 12: (4, 4), 13: (29, 4), 14: (20, 4), 15: (53, 4), 16: (21, 4), 17: (22, 4), 18: (54, 4), 19: (23, 4), 20: (55, 4), 21: (24, 4), 22: (56, 4), 23: (25, 4), 24: (26, 4), 25: (57, 4), 26: (27, 4), 27: (44, 4), 28: (45, 4), 29: (46, 4), 30: (47, 4), 31: (58, 4), 32: (59, 4), 33: (60, 4)}
         
         ws.cell(row=1, column=3).value = combined_name
@@ -110,7 +157,7 @@ def process_excel_file(numbers, combined_name):
     except Exception as e:
         st.error(f"Error processing template: {e}")
         return None
-
+"""
 def display_page_with_overlay(page_num):
     """Display the PNG image with clickable overlay circles"""
     try:
