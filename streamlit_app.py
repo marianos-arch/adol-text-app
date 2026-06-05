@@ -77,10 +77,10 @@ PAGE_3_COORDINATES = {
     27: [(798, 466),  (948, 466),  (1100, 466),  (1248, 466),  (1400, 466)],
     28: [(798, 566),  (948, 566),  (1100, 566),  (1248, 566),  (1400, 566)],
     29: [(798, 666),  (948, 666),  (1100, 666),  (1248, 666),  (1400, 666)],
-    30: [(798, 733),  (948, 733),  (1100, 733),  (1248, 733),  (1400, 733)],
-    31: [(798, 800),  (948, 800),  (1100, 800),  (1248, 800),  (1400, 800)],
-    32: [(798, 900),  (948, 900),  (1100, 900),  (1248, 900),  (1400, 900)],
-    33: [(798, 1000), (948, 1000), (1100, 1000), (1248, 1000), (1400, 1000)],
+    30: [(798, 761),  (948, 761),  (1100, 761),  (1248, 761),  (1400, 761)],
+    31: [(798, 861),  (948, 861),  (1100, 861),  (1248, 861),  (1400, 861)],
+    32: [(798, 961),  (948, 961),  (1100, 961),  (1248, 961),  (1400, 961)],
+    33: [(798, 1028), (948, 1028), (1100, 1028), (1248, 1028), (1400, 1028)],
 }
 
 # Combine all coordinates
@@ -245,6 +245,7 @@ if user_input:
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
 
+                st.write(f"NOTE: Hit [Enable Editing] on Excel to reveal the scores") 
                 
                 # Display the numbers for verification with visual representation
                 st.subheader("3. Your Entries - Visual Confirmation on Images:")
@@ -284,38 +285,6 @@ if user_input:
                 except Exception as e:
                     st.info(f"Note: Image visualization requires PNG files in your repository: adol_blank-1.png, adol_blank-2.png, adol_blank-3.png")
                 
-                
-                # Also display text representation
-                st.subheader("Text Summary:")
-                
-                # Create visual representation with boxes
-                def create_box_representation(number):
-                    """Create a visual box for the response (1-5 scale)"""
-                    boxes = []
-                    for i in range(1, 6):
-                        if i == number:
-                            boxes.append("[    x    ]")
-                        else:
-                            boxes.append("[        ]")
-                    return "  ".join(boxes)
-                
-                # Display entries in three sections
-                st.markdown("**Questions 1-11:**")
-                for q_num in range(1, 12):
-                    box_visual = create_box_representation(numbers[q_num - 1])
-                    st.write(f"Q{q_num}: {box_visual}")
-                
-                st.markdown("**Questions 12-26:**")
-                for q_num in range(12, 27):
-                    box_visual = create_box_representation(numbers[q_num - 1])
-                    st.write(f"Q{q_num}: {box_visual}")
-                
-                st.markdown("**Questions 27-33:**")
-                for q_num in range(27, 34):
-                    box_visual = create_box_representation(numbers[q_num - 1])
-                    st.write(f"Q{q_num}: {box_visual}")
-                
-                st.write(f"NOTE: Hit [Enable Editing] on Excel to reveal the scores") 
                 
         except Exception as e:
             st.error(f"❌ Error processing template: {e}")
