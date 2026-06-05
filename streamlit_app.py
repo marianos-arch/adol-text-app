@@ -136,10 +136,10 @@ combined_name = f"{mentee_name} {date_input}".strip()
 
 
 st.subheader("2. Choose Your Input Method")
-input_method = st.radio("How would you like to enter your scores?", options=["Type Numbers", "Click on Image"], key="input_method")
+input_method = st.radio("How would you like to enter your scores?", options=["Type Numbers", "Click on Visual"], key="input_method")
 
 
-if input_method == "Click on Image":
+if input_method == "Click on Visual":
     st.subheader("3. Click to Enter Your Scores")
     st.write("Navigate through each page and select your response for each question (1=Strongly Disagree, 5=Strongly Agree)")
     # display_page_with_overlay(st.session_state.current_page)
