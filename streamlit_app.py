@@ -8,22 +8,6 @@ from datetime import datetime
 from PIL import Image, ImageDraw
 import os
 
-st.markdown(
-    """
-    <style>
-    /* Change the background color of the main app content area */
-    .stApp {
-        background-color: #E6F2F7;
-    }
-    
-    /* Optional: Change the background color of the sidebar if you use one */
-    [data-testid="stSidebar"] {
-        background-color: #FFFFFF;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 # Coordinate mappings for all three pages
 PAGE_1_COORDINATES = {
