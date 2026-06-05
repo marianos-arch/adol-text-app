@@ -143,11 +143,19 @@ if input_method == "Click on Image":
     st.subheader("3. Click to Enter Your Scores")
     st.write("Navigate through each page and select your response for each question (1=Strongly Disagree, 5=Strongly Agree)")
     # display_page_with_overlay(st.session_state.current_page)
+
+# Initialize session state variables at the very top of your app
+    if "numbers" not in st.session_state:
+        # Creates a list of 33 zeros to track the score for each question
+        st.session_state.numbers = [0] * 33
+
+    if "current_page" not in st.session_state:
+        st.session_state.current_page = 1
+    
     # 1. Define page_num here so Python knows what it is!
     # If you haven't initialized it in session_state yet, default it to 1
     if "current_page" not in st.session_state:
         st.session_state.current_page = 1
-        
     page_num = st.session_state.current_page
     # Get the question range for this page
     if page_num == 1:
