@@ -170,26 +170,6 @@ if input_method == "Click on Image":
 
     st.markdown(f"**Page {page_num} - {page_label}**: Click circles to select (1=Strongly Disagree, 5=Strongly Agree)")
 
-    # Create interactive buttons for navigation and info
-    cols_layout = st.columns(4)
-    
-    with cols_layout[0]:
-        if st.button("◀ Previous Page", disabled=(page_num == 1)):
-            st.session_state.current_page -= 1
-            st.rerun()
-    
-    with cols_layout[1]:
-        st.metric("Page", f"{page_num}/3")
-    
-    with cols_layout[2]:
-        filled_count = sum(1 for n in st.session_state.numbers if n > 0)
-        st.metric("Progress", f"{filled_count}/33")
-    
-    with cols_layout[3]:
-        if st.button("Next Page ▶", disabled=(page_num == 3)):
-            st.session_state.current_page += 1
-            st.rerun()
-    
     st.markdown("---")
     
     # Display question rows with selectable answer options
@@ -219,6 +199,26 @@ if input_method == "Click on Image":
                         st.rerun()
     
     st.markdown("---")
+    
+    # Create interactive buttons for navigation and info
+    cols_layout = st.columns(4)
+    
+    with cols_layout[0]:
+        if st.button("◀ Previous Page", disabled=(page_num == 1)):
+            st.session_state.current_page -= 1
+            st.rerun()
+    
+    with cols_layout[1]:
+        st.metric("Page", f"{page_num}/3")
+    
+    with cols_layout[2]:
+        filled_count = sum(1 for n in st.session_state.numbers if n > 0)
+        st.metric("Progress", f"{filled_count}/33")
+    
+    with cols_layout[3]:
+        if st.button("Next Page ▶", disabled=(page_num == 3)):
+            st.session_state.current_page += 1
+            st.rerun()
     
     # Show summary when any answers are filled
     if any(n > 0 for n in st.session_state.numbers):
