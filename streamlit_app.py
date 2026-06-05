@@ -5,6 +5,8 @@ from io import BytesIO
 import re
 import requests
 from datetime import datetime
+from PIL import Image, ImageDraw
+import os
 
 
 st.title("Quick ADOL Template Guide")
@@ -37,6 +39,142 @@ user_input = st.text_input(
     placeholder="44442145"
 )
 st.caption("Each number must be between 1 and 5. Strong Disagree (1) - Strongly Agree (5) ")
+
+# Coordinate mappings for all three pages
+PAGE_1_COORDINATES = {
+    1:  [(798, 774),  (948, 774),  (1100, 774),  (1248, 774),  (1400, 774)],
+    2:  [(798, 874),  (948, 874),  (1100, 874),  (1248, 874),  (1400, 874)],
+    3:  [(798, 974),  (948, 974),  (1100, 974),  (1248, 974),  (1400, 974)],
+    4:  [(798, 1041), (948, 1041), (1100, 1041), (1248, 1041), (1400, 1041)],
+    5:  [(798, 1141), (948, 1141), (1100, 1141), (1248, 1141), (1400, 1141)],
+    6:  [(798, 1241), (948, 1241), (1100, 1241), (1248, 1241), (1400, 1241)],
+    7:  [(798, 1341), (948, 1341), (1100, 1341), (1248, 1341), (1400, 1341)],
+    8:  [(798, 1441), (948, 1441), (1100, 1441), (1248, 1441), (1400, 1441)],
+    9:  [(798, 1574), (948, 1574), (1100, 1574), (1248, 1574), (1400, 1574)],
+    10: [(798, 1674), (948, 1674), (1100, 1674), (1248, 1674), (1400, 1674)],
+    11: [(798, 1774), (948, 1774), (1100, 1774), (1248, 1774), (1400, 1774)],
+}
+
+PAGE_2_COORDINATES = {
+    12: [(798, 466),  (948, 466),  (1098, 466),  (1258, 466),  (1400, 466)],
+    13: [(798, 566),  (948, 566),  (1098, 566),  (1258, 566),  (1400, 566)],
+    14: [(798, 666),  (948, 666),  (1098, 666),  (1258, 666),  (1400, 666)],
+    15: [(798, 733),  (948, 733),  (1098, 733),  (1258, 733),  (1400, 733)],
+    16: [(798, 800),  (948, 800),  (1098, 800),  (1258, 800),  (1400, 800)],
+    17: [(798, 900),  (948, 900),  (1098, 900),  (1258, 900),  (1400, 900)],
+    18: [(798, 1000), (948, 1000), (1098, 1000), (1258, 1000), (1400, 1000)],
+    19: [(798, 1100), (948, 1100), (1098, 1100), (1258, 1100), (1400, 1100)],
+    20: [(798, 1166), (948, 1166), (1098, 1166), (1258, 1166), (1400, 1166)],
+    21: [(798, 1266), (948, 1266), (1098, 1266), (1258, 1266), (1400, 1266)],
+    22: [(798, 1365), (948, 1365), (1098, 1365), (1258, 1365), (1400, 1365)],
+    23: [(798, 1433), (948, 1433), (1098, 1433), (1258, 1433), (1400, 1433)],
+    24: [(798, 1500), (948, 1500), (1098, 1500), (1258, 1500), (1400, 1500)],
+    25: [(798, 1600), (948, 1600), (1098, 1600), (1258, 1600), (1400, 1600)],
+    26: [(798, 1700), (948, 1700), (1098, 1700), (1258, 1700), (1400, 1700)],
+}
+
+PAGE_3_COORDINATES = {
+    27: [(798, 466),  (948, 466),  (1100, 466),  (1248, 466),  (1400, 466)],
+    28: [(798, 566),  (948, 566),  (1100, 566),  (1248, 566),  (1400, 566)],
+    29: [(798, 666),  (948, 666),  (1100, 666),  (1248, 666),  (1400, 666)],
+    30: [(798, 733),  (948, 733),  (1100, 733),  (1248, 733),  (1400, 733)],
+    31: [(798, 800),  (948, 800),  (1100, 800),  (1248, 800),  (1400, 800)],
+    32: [(798, 900),  (948, 900),  (1100, 900),  (1248, 900),  (1400, 900)],
+    33: [(798, 1000), (948, 1000), (1100, 1000), (1248, 1000), (1400, 1000)],
+}
+
+# Combine all coordinates
+ALL_COORDINATES = {**PAGE_1_COORDINATES, **PAGE_2_COORDINATES, **PAGE_3_COORDINATES}
+
+# Page mapping for questions
+QUESTION_TO_PAGE = {}
+for q in range(1, 12):
+    QUESTION_TO_PAGE[q] = 1
+for q in range(12, 27):
+    QUESTION_TO_PAGE[q] = 2
+for q in range(27, 34):
+    QUESTION_TO_PAGE[q] = 3
+
+
+def draw_marker_on_image(image_path, question_num, selected_option, marker_color=(255, 0, 0), marker_radius=40):
+    """
+    Draw a circle or square on the image at the selected option's coordinate.
+    
+    Args:
+        image_path: Path to the image file
+        question_num: Question number (1-33)
+        selected_option: Selected option number (1-5)
+        marker_color: RGB tuple for marker color (default: red)
+        marker_radius: Radius of the circle/square
+    
+    Returns:
+        PIL Image object with marker drawn
+    """
+    img = Image.open(image_path).convert("RGB")
+    draw = ImageDraw.Draw(img, 'RGBA')
+    
+    if question_num in ALL_COORDINATES:
+        coords = ALL_COORDINATES[question_num]
+        # selected_option is 1-5, so index is selected_option - 1
+        if 1 <= selected_option <= 5:
+            x, y = coords[selected_option - 1]
+            # Draw circle with semi-transparent fill
+            draw.ellipse(
+                [(x - marker_radius, y - marker_radius), (x + marker_radius, y + marker_radius)],
+                outline=marker_color,
+                width=5,
+                fill=marker_color + (100,)  # Add alpha for transparency
+            )
+    
+    return img
+
+
+def create_annotated_page_image(base_image_path, page_num, numbers):
+    """
+    Create an annotated version of a page with all markers for that page's questions.
+    
+    Args:
+        base_image_path: Path to the base PNG image
+        page_num: Page number (1, 2, or 3)
+        numbers: List of all 33 user input numbers
+    
+    Returns:
+        PIL Image object with all markers for that page
+    """
+    img = Image.open(base_image_path).convert("RGB")
+    draw = ImageDraw.Draw(img, 'RGBA')
+    
+    marker_color = (255, 0, 0)  # Red
+    marker_radius = 40
+    
+    # Determine question range for this page
+    if page_num == 1:
+        question_range = range(1, 12)
+    elif page_num == 2:
+        question_range = range(12, 27)
+    elif page_num == 3:
+        question_range = range(27, 34)
+    else:
+        return img
+    
+    # Draw all markers for this page
+    for question_num in question_range:
+        selected_option = numbers[question_num - 1]  # Get the user's answer (1-5)
+        
+        if question_num in ALL_COORDINATES and 1 <= selected_option <= 5:
+            coords = ALL_COORDINATES[question_num]
+            x, y = coords[selected_option - 1]
+            
+            # Draw circle with semi-transparent fill
+            draw.ellipse(
+                [(x - marker_radius, y - marker_radius), (x + marker_radius, y + marker_radius)],
+                outline=marker_color,
+                width=5,
+                fill=marker_color + (100,)
+            )
+    
+    return img
+
 
 # Step 3: Process and validate input
 if user_input:
@@ -142,8 +280,43 @@ if user_input:
 
                 
                 # Display the numbers for verification with visual representation
-                st.subheader("3. Your Entries:")
+                st.subheader("3. Your Entries - Visual Confirmation on Images:")
                 st.write(f"Mentee Name and Date: {combined_name}")
+                
+                # Display annotated images for each page
+                # Try to load and display PNG images with markers
+                try:
+                    for page_num in [1, 2, 3]:
+                        image_filename = f"page_{page_num}.png"
+                        github_image_url = f"https://raw.githubusercontent.com/marianos-arch/adol-text-app/main/{image_filename}"
+                        
+                        try:
+                            # Download image from GitHub
+                            img_response = requests.get(github_image_url)
+                            if img_response.status_code == 200:
+                                base_image = Image.open(BytesIO(img_response.content))
+                                
+                                # Create annotated version
+                                annotated_img = create_annotated_page_image(
+                                    BytesIO(img_response.content), 
+                                    page_num, 
+                                    numbers
+                                )
+                                
+                                # Display the annotated image
+                                st.markdown(f"**Page {page_num} - Questions {1 + (page_num-1)*11 if page_num < 3 else 27}-{11 + (page_num-1)*11 if page_num < 3 else 33}:**")
+                                st.image(annotated_img, use_column_width=True)
+                            else:
+                                st.warning(f"⚠️ Could not load {image_filename} from GitHub.")
+                        except Exception as e:
+                            st.warning(f"⚠️ Error processing {image_filename}: {e}")
+                
+                except Exception as e:
+                    st.info(f"Note: Image visualization requires PNG files in your repository: page_1.png, page_2.png, page_3.png")
+                
+                
+                # Also display text representation
+                st.subheader("Text Summary:")
                 
                 # Create visual representation with boxes
                 def create_box_representation(number):
