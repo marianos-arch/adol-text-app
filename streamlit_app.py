@@ -368,8 +368,8 @@ if input_method == "Click on Image":
                         st.info(f"Note: Image visualization requires PNG files in your repository: adol_blank-1.png, adol_blank-2.png, adol_blank-3.png")
 
             # ADD THESE TWO LINES HERE (Indented with 4 spaces to match the 'try:' on line 241)
-        except Exception as e:
-            st.error(f"❌ Error processing template: {e}")
+            except Exception as e:
+                st.error(f"❌ Error processing template: {e}")
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Step 3: Get user input
 if input_method == "Type Numbers":
