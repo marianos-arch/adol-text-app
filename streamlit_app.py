@@ -155,71 +155,71 @@ if imput_method == "Click on Image":
         page_label = "Questions 27-33"
 
     st.markdown(f"**Page {page_num} - {page_label}**: Click circles to select (1=Strongly Disagree, 5=Strongly Agree)")
+
+    # Create interactive buttons for navigation and info
+    cols_layout = st.columns(4)
     
-        # Create interactive buttons for navigation and info
-        cols_layout = st.columns(4)
+    with cols_layout[0]:
+        if st.button("◀ Previous Page", disabled=(page_num == 1)):
+            st.session_state.current_page -= 1
+            st.rerun()
+    
+    with cols_layout[1]:
+        st.metric("Page", f"{page_num}/3")
+    
+    with cols_layout[2]:
+        filled_count = sum(1 for n in st.session_state.numbers if n > 0)
+        st.metric("Progress", f"{filled_count}/33")
+    
+    with cols_layout[3]:
+        if st.button("Next Page ▶", disabled=(page_num == 3)):
+            st.session_state.current_page += 1
+            st.rerun()
+    
+    st.markdown("---")
+    
+    # Display question rows with selectable answer options
+    for question_num in question_range:
+        cols = st.columns([1, 5, 1, 1, 1, 1, 1])
         
-        with cols_layout[0]:
-            if st.button("◀ Previous Page", disabled=(page_num == 1)):
-                st.session_state.current_page -= 1
-                st.rerun()
+        with cols[0]:
+            st.write(f"**Q{question_num}**")
         
-        with cols_layout[1]:
-            st.metric("Page", f"{page_num}/3")
+        with cols[1]:
+            st.write("")  # Spacer
         
-        with cols_layout[2]:
-            filled_count = sum(1 for n in st.session_state.numbers if n > 0)
-            st.metric("Progress", f"{filled_count}/33")
+        # 5 answer option buttons (1-5 scale)
+        for option in range(1, 6):
+            col_idx = option + 1
+            with cols[col_idx]:
+                # Create button with visual indicator
+                if st.session_state.numbers[question_num - 1] == option:
+                    # Selected state - filled circle
+                    if st.button("●", key=f"q{question_num}_opt{option}", help=f"Question {question_num}, Option {option}"):
+                        st.session_state.numbers[question_num - 1] = option
+                        st.rerun()
+                else:
+                    # Unselected state - empty circle
+                    if st.button("○", key=f"q{question_num}_opt{option}", help=f"Question {question_num}, Option {option}"):
+                        st.session_state.numbers[question_num - 1] = option
+                        st.rerun()
+    
+    st.markdown("---")
+    
+    # Show summary when any answers are filled
+    if any(n > 0 for n in st.session_state.numbers):
+        st.subheader("Your Current Entries:")
+        col1, col2 = st.columns(2)
         
-        with cols_layout[3]:
-            if st.button("Next Page ▶", disabled=(page_num == 3)):
-                st.session_state.current_page += 1
-                st.rerun()
+        with col1:
+            st.write("**Summary:**")
+            entries_str = ''.join(str(n) if n > 0 else '_' for n in st.session_state.numbers)
+            st.code(entries_str, language="text")
         
-        st.markdown("---")
-        
-        # Display question rows with selectable answer options
-        for question_num in question_range:
-            cols = st.columns([1, 5, 1, 1, 1, 1, 1])
-            
-            with cols[0]:
-                st.write(f"**Q{question_num}**")
-            
-            with cols[1]:
-                st.write("")  # Spacer
-            
-            # 5 answer option buttons (1-5 scale)
-            for option in range(1, 6):
-                col_idx = option + 1
-                with cols[col_idx]:
-                    # Create button with visual indicator
-                    if st.session_state.numbers[question_num - 1] == option:
-                        # Selected state - filled circle
-                        if st.button("●", key=f"q{question_num}_opt{option}", help=f"Question {question_num}, Option {option}"):
-                            st.session_state.numbers[question_num - 1] = option
-                            st.rerun()
-                    else:
-                        # Unselected state - empty circle
-                        if st.button("○", key=f"q{question_num}_opt{option}", help=f"Question {question_num}, Option {option}"):
-                            st.session_state.numbers[question_num - 1] = option
-                            st.rerun()
-        
-        st.markdown("---")
-        
-        # Show summary when any answers are filled
-        if any(n > 0 for n in st.session_state.numbers):
-            st.subheader("Your Current Entries:")
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.write("**Summary:**")
-                entries_str = ''.join(str(n) if n > 0 else '_' for n in st.session_state.numbers)
-                st.code(entries_str, language="text")
-            
-            with col2:
-                st.write("**Detailed View:**")
-                filled_answers = {i+1: n for i, n in enumerate(st.session_state.numbers) if n > 0}
-                st.json(filled_answers)
+        with col2:
+            st.write("**Detailed View:**")
+            filled_answers = {i+1: n for i, n in enumerate(st.session_state.numbers) if n > 0}
+            st.json(filled_answers)
 
 
 
