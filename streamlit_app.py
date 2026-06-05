@@ -235,9 +235,12 @@ if input_method == "Click on Image":
             filled_answers = {i+1: n for i, n in enumerate(st.session_state.numbers) if n > 0}
             st.json(filled_answers)
 
+         # Show download button when complete
+        if all(n > 0 for n in st.session_state.numbers):
+            st.success("✓ All questions answered!")
 
 
-
+    
 
 
 
