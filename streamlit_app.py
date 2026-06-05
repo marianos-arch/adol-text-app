@@ -4,13 +4,9 @@ from openpyxl import load_workbook
 from io import BytesIO
 import re
 import requests
-from PIL import Image, ImageDraw
-try:
-    from streamlit_image_coordinates import streamlit_image_coordinates
-except ImportError:
-    streamlit_image_coordinates = None
+from PIL import Image
 
-MAX_IMAGE_WIDTH = 1000
+st.set_page_config(layout="wide")
 
 st.title("Quick ADOL Template Guide")
 st.write("Insert numbers into the pre-formatted ADOL Scoresheet on Excel and Print it!")
@@ -29,6 +25,7 @@ combined_name = f"{mentee_name} {date_input}".strip()
 st.subheader("2. Choose Your Input Method")
 input_method = st.radio("How would you like to enter your scores?", options=["Type Numbers", "Click on Image"], key="input_method")
 
+# Coordinate mappings for answer positions (x, y) for each question on each page
 PAGE_1_COORDINATES = {
     1:  [(798, 774),  (948, 774),  (1100, 774),  (1248, 774),  (1400, 774)],
     2:  [(798, 874),  (948, 874),  (1100, 874),  (1248, 874),  (1400, 874)],
@@ -73,60 +70,14 @@ PAGE_3_COORDINATES = {
 
 ALL_COORDINATES = {**PAGE_1_COORDINATES, **PAGE_2_COORDINATES, **PAGE_3_COORDINATES}
 
+# Initialize session state
 if 'numbers' not in st.session_state:
     st.session_state.numbers = [0] * 33
 if 'current_page' not in st.session_state:
     st.session_state.current_page = 1
 
-def find_question_at_click(x, y, page_num, scale_factor):
-    if page_num == 1:
-        question_range = range(1, 12)
-    elif page_num == 2:
-        question_range = range(12, 27)
-    elif page_num == 3:
-        question_range = range(27, 34)
-    else:
-        return None, None
-    x_orig = x / scale_factor
-    y_orig = y / scale_factor
-    for question_num in question_range:
-        if question_num in ALL_COORDINATES:
-            coords = ALL_COORDINATES[question_num]
-            for option_idx, (coord_x, coord_y) in enumerate(coords):
-                distance = ((x_orig - coord_x) ** 2 + (y_orig - coord_y) ** 2) ** 0.5
-                if distance < 80:
-                    return question_num, option_idx + 1
-    return None, None
-
-def create_annotated_page_image(image_bytes, page_num, numbers, max_width=1000):
-    img = Image.open(image_bytes).convert("RGB")
-    original_width = img.width
-    scale_factor = max_width / original_width
-    new_width = max_width
-    new_height = int(img.height * scale_factor)
-    img_display = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-    draw = ImageDraw.Draw(img_display, 'RGBA')
-    marker_color = (255, 0, 0)
-    marker_radius = int(40 * scale_factor)
-    if page_num == 1:
-        question_range = range(1, 12)
-    elif page_num == 2:
-        question_range = range(12, 27)
-    elif page_num == 3:
-        question_range = range(27, 34)
-    else:
-        return img_display
-    for question_num in question_range:
-        selected_option = numbers[question_num - 1]
-        if question_num in ALL_COORDINATES and 1 <= selected_option <= 5:
-            coords = ALL_COORDINATES[question_num]
-            x_orig, y_orig = coords[selected_option - 1]
-            x = int(x_orig * scale_factor)
-            y = int(y_orig * scale_factor)
-            draw.ellipse([(x - marker_radius, y - marker_radius), (x + marker_radius, y + marker_radius)], outline=marker_color, width=5, fill=marker_color + (100,))
-    return img_display
-
 def process_excel_file(numbers, combined_name):
+    """Process and fill the Excel template with answers"""
     try:
         github_url = "https://raw.githubusercontent.com/marianos-arch/adol-text-app/main/template.xlsx"
         response = requests.get(github_url)
@@ -137,16 +88,21 @@ def process_excel_file(numbers, combined_name):
         wb = load_workbook(template_bytes)
         wb.calculation.calcMode = 'auto'
         ws = wb.active
-        question_cell_mapping = {1: (48, 4), 2: (38, 4), 3: (39, 4), 4: (49, 4), 5: (40, 4), 6: (41, 4), 7: (50, 4), 8: (51, 4), 9: (42, 4), 10: (52, 4), 11: (43, 4), 12: (4, 4), 13: (29, 4), 14: (20, 4), 15: (5, 4), 16: (6, 4), 17: (7, 4), 18: (21, 4), 19: (30, 4), 20: (8, 4), 21: (9, 4), 22: (22, 4), 23: (10, 4), 24: (11, 4), 25: (31, 4), 26: (12, 4), 27: (32, 4), 28: (23, 4), 29: (13, 4), 30: (14, 4), 31: (24, 4), 32: (15, 4), 33: (33, 4)}
+        
+        # Mapping of question numbers to Excel cell coordinates
+        question_cell_mapping = {1: (48, 4), 2: (38, 4), 3: (39, 4), 4: (49, 4), 5: (40, 4), 6: (41, 4), 7: (50, 4), 8: (51, 4), 9: (42, 4), 10: (52, 4), 11: (43, 4), 12: (4, 4), 13: (29, 4), 14: (20, 4), 15: (53, 4), 16: (21, 4), 17: (22, 4), 18: (54, 4), 19: (23, 4), 20: (55, 4), 21: (24, 4), 22: (56, 4), 23: (25, 4), 24: (26, 4), 25: (57, 4), 26: (27, 4), 27: (44, 4), 28: (45, 4), 29: (46, 4), 30: (47, 4), 31: (58, 4), 32: (59, 4), 33: (60, 4)}
+        
         ws.cell(row=1, column=3).value = combined_name
         for question_num, number in enumerate(numbers, start=1):
             if question_num in question_cell_mapping:
                 row, col = question_cell_mapping[question_num]
                 ws.cell(row=row, column=col).value = number
+        
         try:
             wb.calculate()
         except:
             pass
+        
         output = BytesIO()
         wb.save(output)
         output.seek(0)
@@ -155,120 +111,148 @@ def process_excel_file(numbers, combined_name):
         st.error(f"Error processing template: {e}")
         return None
 
+def display_page_with_overlay(page_num):
+    """Display the PNG image with clickable overlay circles"""
+    try:
+        image_filename = f"adol_blank-{page_num}.png"
+        github_image_url = f"https://raw.githubusercontent.com/marianos-arch/adol-text-app/main/{image_filename}"
+        img_response = requests.get(github_image_url)
+        
+        if img_response.status_code != 200:
+            st.error(f"Failed to load image for page {page_num}")
+            return
+        
+        # Display the base image
+        st.image(img_response.content, use_column_width=True)
+        
+        # Get the question range for this page
+        if page_num == 1:
+            question_range = range(1, 12)
+            page_label = "Questions 1-11"
+        elif page_num == 2:
+            question_range = range(12, 27)
+            page_label = "Questions 12-26"
+        else:
+            question_range = range(27, 34)
+            page_label = "Questions 27-33"
+        
+        st.markdown(f"**Page {page_num} - {page_label}**: Click circles to select (1=Strongly Disagree, 5=Strongly Agree)")
+        
+        # Create interactive buttons for navigation and info
+        cols_layout = st.columns(4)
+        
+        with cols_layout[0]:
+            if st.button("◀ Previous Page", disabled=(page_num == 1)):
+                st.session_state.current_page -= 1
+                st.rerun()
+        
+        with cols_layout[1]:
+            st.metric("Page", f"{page_num}/3")
+        
+        with cols_layout[2]:
+            filled_count = sum(1 for n in st.session_state.numbers if n > 0)
+            st.metric("Progress", f"{filled_count}/33")
+        
+        with cols_layout[3]:
+            if st.button("Next Page ▶", disabled=(page_num == 3)):
+                st.session_state.current_page += 1
+                st.rerun()
+        
+        st.markdown("---")
+        
+        # Display question rows with selectable answer options
+        for question_num in question_range:
+            cols = st.columns([1, 5, 1, 1, 1, 1, 1])
+            
+            with cols[0]:
+                st.write(f"**Q{question_num}**")
+            
+            with cols[1]:
+                st.write("")  # Spacer
+            
+            # 5 answer option buttons (1-5 scale)
+            for option in range(1, 6):
+                col_idx = option + 1
+                with cols[col_idx]:
+                    # Create button with visual indicator
+                    if st.session_state.numbers[question_num - 1] == option:
+                        # Selected state - filled circle
+                        if st.button("●", key=f"q{question_num}_opt{option}", help=f"Question {question_num}, Option {option}"):
+                            st.session_state.numbers[question_num - 1] = option
+                            st.rerun()
+                    else:
+                        # Unselected state - empty circle
+                        if st.button("○", key=f"q{question_num}_opt{option}", help=f"Question {question_num}, Option {option}"):
+                            st.session_state.numbers[question_num - 1] = option
+                            st.rerun()
+        
+        st.markdown("---")
+        
+        # Show summary when any answers are filled
+        if any(n > 0 for n in st.session_state.numbers):
+            st.subheader("Your Current Entries:")
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.write("**Summary:**")
+                entries_str = ''.join(str(n) if n > 0 else '_' for n in st.session_state.numbers)
+                st.code(entries_str, language="text")
+            
+            with col2:
+                st.write("**Detailed View:**")
+                filled_answers = {i+1: n for i, n in enumerate(st.session_state.numbers) if n > 0}
+                st.json(filled_answers)
+            
+            # Show download button when complete
+            if all(n > 0 for n in st.session_state.numbers):
+                st.success("✓ All questions answered!")
+                output = process_excel_file(st.session_state.numbers, combined_name)
+                if output:
+                    safe_name = re.sub(r'[^a-zA-Z0-9_-]', '', mentee_name.replace(' ', '_'))
+                    safe_date = re.sub(r'[^0-9_-]', '', date_input.replace('/', '_'))
+                    file_name = f"ADOL_Scoresheet_{safe_name}_{safe_date}.xlsx" if safe_name else "ADOL_Scoresheet_Filled.xlsx"
+                    st.download_button(
+                        label="📥 Download Filled ADOL Sheet",
+                        data=output.getvalue(),
+                        file_name=file_name,
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                    st.info("💡 Tip: Click [Enable Editing] in Excel to reveal the scores")
+    
+    except Exception as e:
+        st.error(f"Error displaying page: {e}")
+
 if input_method == "Type Numbers":
     st.subheader("2. Enter Your Numbers (From Question 1 to Question 33)")
     user_input = st.text_input("Enter numbers (e.g., '44442145' or '4 4 4 4 2 1 4 5'):", placeholder="44442145")
     st.caption("Each number must be between 1 and 5. Strong Disagree (1) - Strongly Agree (5)")
+    
     if user_input:
         cleaned_input = re.sub(r'\s+', '', user_input)
         numbers = [int(char) for char in cleaned_input if char.isdigit()]
+        
         if len(numbers) != 33:
-            st.error(f"Please enter exactly 33 numbers. You entered {len(numbers)}.")
+            st.error(f"❌ Please enter exactly 33 numbers. You entered {len(numbers)}.")
         elif not all(1 <= num <= 5 for num in numbers):
-            st.error("All numbers must be between 1 and 5.")
+            st.error("❌ All numbers must be between 1 and 5.")
         else:
-            st.success(f"Valid input! You entered: {numbers}")
+            st.success(f"✓ Valid input!")
             st.session_state.numbers = numbers
+            
             output = process_excel_file(numbers, combined_name)
             if output:
                 safe_name = re.sub(r'[^a-zA-Z0-9_-]', '', mentee_name.replace(' ', '_'))
                 safe_date = re.sub(r'[^0-9_-]', '', date_input.replace('/', '_'))
                 file_name = f"ADOL_Scoresheet_{safe_name}_{safe_date}.xlsx" if safe_name else "ADOL_Scoresheet_Filled.xlsx"
-                st.download_button(label="Download Filled ADOL Sheet", data=output.getvalue(), file_name=file_name, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-                st.write("NOTE: Hit [Enable Editing] on Excel to reveal the scores")
-                st.subheader("3. Your Entries - Visual Confirmation on Images:")
-                st.write(f"Mentee Name and Today's Date: {combined_name}")
-                for page_num in [1, 2, 3]:
-                    image_filename = f"adol_blank-{page_num}.png"
-                    github_image_url = f"https://raw.githubusercontent.com/marianos-arch/adol-text-app/main/{image_filename}"
-                    try:
-                        img_response = requests.get(github_image_url)
-                        if img_response.status_code == 200:
-                            annotated_img = create_annotated_page_image(BytesIO(img_response.content), page_num, numbers, max_width=MAX_IMAGE_WIDTH)
-                            if page_num == 1:
-                                st.markdown(f"**Page {page_num} - Questions 1-11:**")
-                            elif page_num == 2:
-                                st.markdown(f"**Page {page_num} - Questions 12-26:**")
-                            else:
-                                st.markdown(f"**Page {page_num} - Questions 27-33:**")
-                            st.image(annotated_img, use_column_width=False, width=MAX_IMAGE_WIDTH)
-                    except:
-                        pass
+                st.download_button(
+                    label="📥 Download Filled ADOL Sheet",
+                    data=output.getvalue(),
+                    file_name=file_name,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+                st.info("💡 Tip: Click [Enable Editing] in Excel to reveal the scores")
+
 else:
-    st.subheader("2. Click on the ADOL Scoresheet to Enter Your Scores")
-    st.write("Navigate through each page and click on your response for each question (1-5 scale)")
-    try:
-        image_filename = f"adol_blank-{st.session_state.current_page}.png"
-        github_image_url = f"https://raw.githubusercontent.com/marianos-arch/adol-text-app/main/{image_filename}"
-        img_response = requests.get(github_image_url)
-        if img_response.status_code == 200:
-            annotated_img = create_annotated_page_image(BytesIO(img_response.content), st.session_state.current_page, st.session_state.numbers, max_width=MAX_IMAGE_WIDTH)
-            page_num = st.session_state.current_page
-            if page_num == 1:
-                st.markdown(f"**Page {page_num} - Questions 1-11:**")
-            elif page_num == 2:
-                st.markdown(f"**Page {page_num} - Questions 12-26:**")
-            else:
-                st.markdown(f"**Page {page_num} - Questions 27-33:**")
-            if streamlit_image_coordinates is not None:
-                coords = streamlit_image_coordinates(annotated_img, key=f"coords_page_{page_num}")
-                if coords:
-                    x = coords["x"]
-                    y = coords["y"]
-                    display_scale = MAX_IMAGE_WIDTH / Image.open(BytesIO(img_response.content)).width
-                    question_num, option_value = find_question_at_click(x, y, page_num, display_scale)
-                    if question_num and option_value:
-                        st.session_state.numbers[question_num - 1] = option_value
-                        st.success(f"Question {question_num} set to {option_value}")
-                        st.rerun()
-            else:
-                st.image(annotated_img, use_column_width=False, width=MAX_IMAGE_WIDTH)
-            if page_num == 1:
-                question_range = range(1, 12)
-            elif page_num == 2:
-                question_range = range(12, 27)
-            else:
-                question_range = range(27, 34)
-            st.write("---")
-            st.write("**Or enter scores manually for this page:**")
-            cols = st.columns(len(list(question_range)))
-            for idx, question_num in enumerate(question_range):
-                with cols[idx]:
-                    st.session_state.numbers[question_num - 1] = st.selectbox(f"Q{question_num}", options=[0, 1, 2, 3, 4, 5], index=st.session_state.numbers[question_num - 1], key=f"question_{question_num}")
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                if st.button("Previous Page", disabled=(st.session_state.current_page == 1)):
-                    st.session_state.current_page -= 1
-                    st.rerun()
-            with col2:
-                st.write(f"Page {st.session_state.current_page} of 3")
-            with col3:
-                if st.button("Next Page", disabled=(st.session_state.current_page == 3)):
-                    st.session_state.current_page += 1
-                    st.rerun()
-            with col4:
-                filled_count = sum(1 for n in st.session_state.numbers if n > 0)
-                st.metric("Progress", f"{filled_count}/33")
-            st.write("---")
-            if any(n > 0 for n in st.session_state.numbers):
-                st.subheader("Your Current Entries:")
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.write("**Summary:**")
-                    entries_str = ''.join(str(n) if n > 0 else '_' for n in st.session_state.numbers)
-                    st.code(entries_str, language="text")
-                with col2:
-                    st.write("**Detailed View:**")
-                    filled_answers = {i+1: n for i, n in enumerate(st.session_state.numbers) if n > 0}
-                    st.json(filled_answers)
-                if all(n > 0 for n in st.session_state.numbers):
-                    st.success("All questions answered!")
-                    output = process_excel_file(st.session_state.numbers, combined_name)
-                    if output:
-                        safe_name = re.sub(r'[^a-zA-Z0-9_-]', '', mentee_name.replace(' ', '_'))
-                        safe_date = re.sub(r'[^0-9_-]', '', date_input.replace('/', '_'))
-                        file_name = f"ADOL_Scoresheet_{safe_name}_{safe_date}.xlsx" if safe_name else "ADOL_Scoresheet_Filled.xlsx"
-                        st.download_button(label="Download Filled ADOL Sheet", data=output.getvalue(), file_name=file_name, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-                        st.write("NOTE: Hit [Enable Editing] on Excel to reveal the scores")
-    except:
-        pass
+    st.subheader("2. Click to Enter Your Scores")
+    st.write("Navigate through each page and select your response for each question (1=Strongly Disagree, 5=Strongly Agree)")
+    display_page_with_overlay(st.session_state.current_page)
