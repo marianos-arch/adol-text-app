@@ -214,7 +214,7 @@ if input_method == "Click on Image":
                         st.rerun()
                 else:
                     # Unselected state - empty circle
-                    if st.button("⚪", key=f"q{question_num}_opt{option}", help=f"Question {question_num}, Option {option}"):
+                    if st.button("○", key=f"q{question_num}_opt{option}", help=f"Question {question_num}, Option {option}"):
                         st.session_state.numbers[question_num - 1] = option
                         st.rerun()
     
