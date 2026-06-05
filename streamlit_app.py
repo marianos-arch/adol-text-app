@@ -235,10 +235,10 @@ if input_method == "Click on Image":
             filled_answers = {i+1: n for i, n in enumerate(st.session_state.numbers) if n > 0}
             st.json(filled_answers)
 
-         # Show download button when complete
+        # Show download button when complete
         if all(n > 0 for n in st.session_state.numbers):
             st.success("✓ All questions answered!")
-
+            
             try:
                 # Download template from GitHub
                 github_url = "https://raw.githubusercontent.com/marianos-arch/adol-text-app/main/template.xlsx"
@@ -330,7 +330,8 @@ if input_method == "Click on Image":
                     st.write(f"NOTE: Hit [Enable Editing] on Excel to reveal the scores") 
 
     
-
+            except Exception as e:
+                st.error(f"❌ An error occurred while generating the Excel file: {e}")
 
 
 
