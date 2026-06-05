@@ -123,7 +123,7 @@ def display_page_with_overlay(page_num):
             return
         
         # Display the base image
-        st.image(img_response.content, use_column_width=True)
+        #st.image(img_response.content, use_column_width=True)
         
         # Get the question range for this page
         if page_num == 1:
