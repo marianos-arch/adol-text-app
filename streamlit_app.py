@@ -328,10 +328,45 @@ if input_method == "Click on Image":
                         )
     
                     st.write(f"NOTE: Hit [Enable Editing] on Excel to reveal the scores") 
-
     
-            except Exception as e:
-                st.error(f"❌ An error occurred while generating the Excel file: {e}")
+                    # Display the numbers for verification with visual representation
+                    st.subheader("3. Your Entries - Visual Confirmation on Images:")
+                    st.write(f"Mentee Name and Today's Date: {combined_name}")
+    
+                    # Display annotated images for each page
+                    # Try to load and display PNG images with markers
+                    try:
+                        for page_num in [1, 2, 3]:
+                            image_filename = f"adol_blank-{page_num}.png"
+                            github_image_url = f"https://raw.githubusercontent.com/marianos-arch/adol-text-app/main/{image_filename}"
+    
+                            try:
+                                # Download image from GitHub
+                                img_response = requests.get(github_image_url)
+                                if img_response.status_code == 200:
+                                    # Create annotated version
+                                    annotated_img = create_annotated_page_image(
+                                        BytesIO(img_response.content), 
+                                        page_num, 
+                                        numbers
+                                    )
+    
+                                    # Display the annotated image
+                                    if page_num == 1:
+                                        st.markdown(f"**Page {page_num} - Questions 1-11:**")
+                                    elif page_num == 2:
+                                        st.markdown(f"**Page {page_num} - Questions 12-26:**")
+                                    else:
+                                        st.markdown(f"**Page {page_num} - Questions 27-33:**")
+                                    st.image(annotated_img, use_column_width=True)
+                                else:
+                                    st.warning(f"⚠️ Could not load {image_filename} from GitHub.")
+                            except Exception as e:
+                                st.warning(f"⚠️ Error processing {image_filename}: {e}")
+    
+                    except Exception as e:
+                        st.info(f"Note: Image visualization requires PNG files in your repository: adol_blank-1.png, adol_blank-2.png, adol_blank-3.png")
+
 
 
 
